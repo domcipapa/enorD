@@ -11,16 +11,16 @@ const int pin_fr = 3;
 const int pin_bl = 11;
 const int pin_br = 10;
 
-const float complementary_filter = 0.98;
-const float pid_filter = 0.9;
+const float complementary_filter = 0.95;
+const float pid_filter           = 0.92;
 
 const float rad_to_deg = 180.0 / 3.141592654;
 
 float throttle = 0;
 
-float gain_p[3]            = { 1.5, 1.5, 1.5 };
+float gain_p[3]            = { 1.2, 1.2, 1.2 };
 float gain_i[3]            = { 0.0, 0.0, 0.0 };
-float gain_d[3]            = { 0.4, 0.4, 0.4 };
+float gain_d[3]            = { 0.6, 0.6, 0.6 };
 float angle_desired[3]     = { 0.0, 0.0, 0.0 };
 
 float error_current[3]     = { 0.0, 0.0, 0.0 };
@@ -46,7 +46,7 @@ double time_elapsed        = 0.0;
 
 void setup() {
   Serial.begin(115200);
-  while (!Serial) {}
+  while (!Serial) { ; }
 
   Wire.begin();
   Wire.beginTransmission(mpu_address);
@@ -73,8 +73,8 @@ void setup() {
 void calibrate_angle_offsets() {
   const int samples = 100;
 
-  float gyro_sum[3] = {0.0, 0.0, 0.0};
-  float acc_sum[3] = {0.0, 0.0, 0.0};
+  float gyro_sum[3] = { 0.0, 0.0, 0.0 };
+  float acc_sum[3] = { 0.0, 0.0, 0.0 };
 
   for (int i = 0; i < samples; i++) {
     read_gyro();
