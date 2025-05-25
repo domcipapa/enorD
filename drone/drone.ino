@@ -35,7 +35,7 @@ float angle_current[3]     = { 0.0, 0.0, 0.0 };
 float angle_acc[3]         = { 0.0, 0.0, 0.0 };
 float angle_gyro[3]        = { 0.0, 0.0, 0.0 };
 float angle_acc_raw[3]     = { 0.0, 0.0, 0.0 };
-int16_t angle_gyro_raw[3]  = { 0, 0, 0 };
+float angle_gyro_raw[3]    = { 0.0, 0.0, 0.0 };
 
 float angle_acc_offset[3]  = { 0.0, 0.0, 0.0 };
 float angle_gyro_offset[3] = { 0.0, 0.0, 0.0 };
@@ -139,13 +139,17 @@ void read_gyro() {
   Wire.endTransmission(false);
   Wire.requestFrom(mpu_address, 6, true);
 
-  angle_gyro_raw[pitch] = Wire.read() << 8 | Wire.read();
-  angle_gyro_raw[roll] = Wire.read() << 8 | Wire.read();
-  angle_gyro_raw[yaw] = Wire.read() << 8 | Wire.read();
+  angle_gyro_raw[pitch] = (Wire.read() << 8 | Wire.read()) / 131.0;
+  angle_gyro_raw[roll] = (Wire.read() << 8 | Wire.read()) / 131.0;
+  angle_gyro_raw[yaw] = (Wire.read() << 8 | Wire.read()) / 131.0;
 
-  angle_gyro[pitch] = (angle_gyro_raw[pitch] / 131.0) - angle_gyro_offset[pitch];
-  angle_gyro[roll] = (angle_gyro_raw[roll] / 131.0) - angle_gyro_offset[roll];
-  angle_gyro[yaw] = (angle_gyro_raw[yaw] / 131.0) - angle_gyro_offset[yaw];
+  angle_gyro[pitch] = angle_gyro_raw[pitch];
+  angle_gyro[roll] = angle_gyro_raw[roll];
+  angle_gyro[yaw] = angle_gyro_raw[yaw];
+
+  angle_gyro[pitch] -= angle_gyro_offset[pitch];
+  angle_gyro[roll] -= angle_gyro_offset[roll];
+  angle_gyro[yaw] -= angle_gyro_offset[yaw];
 }
 
 void read_accelerometer() {
@@ -154,9 +158,9 @@ void read_accelerometer() {
   Wire.endTransmission(false);
   Wire.requestFrom(mpu_address, 6, true);
 
-  angle_acc_raw[pitch] = ((Wire.read() << 8 | Wire.read()) / 16384.0);
-  angle_acc_raw[roll] = ((Wire.read() << 8 | Wire.read()) / 16384.0);
-  angle_acc_raw[yaw] = ((Wire.read() << 8 | Wire.read()) / 16384.0);
+  angle_acc_raw[pitch] = (Wire.read() << 8 | Wire.read()) / 16384.0;
+  angle_acc_raw[roll] = (Wire.read() << 8 | Wire.read()) / 16384.0;
+  angle_acc_raw[yaw] = (Wire.read() << 8 | Wire.read()) / 16384.0;
 
   angle_acc[pitch] = atan2(angle_acc_raw[roll], sqrt(pow(angle_acc_raw[pitch], 2) + pow(angle_acc_raw[yaw], 2))) * rad_to_deg;
   angle_acc[roll] = atan2(-angle_acc_raw[pitch], sqrt(pow(angle_acc_raw[roll], 2) + pow(angle_acc_raw[yaw], 2))) * rad_to_deg;
